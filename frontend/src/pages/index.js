@@ -204,7 +204,7 @@ export default () => {
         <Layout>
             <div style={{ background: '#fff', padding: 16 }}>
                 {error && <Alert type="error" message="エラーが発生しました。" style={{ marginBottom: 8 }} />}
-                {likeExceedError && <Alert type="error" message="LGMTが1000を超えるユーザーは取得できません。" style={{ marginBottom: 8 }} />}
+                {likeExceedError && <Alert type="error" message="LGTMが1000を超えるユーザーは取得できません。" style={{ marginBottom: 8 }} />}
                 <Row gutter={8}>
                     {Array(userCount).fill(null).map((_, i) => {
                         const user = users[i];
