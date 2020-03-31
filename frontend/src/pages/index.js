@@ -2,21 +2,18 @@ import React, {
     useEffect, useRef, useCallback, useState
 } from 'react';
 import {
-    Button, Input, Row, Col
+    Button, Input, Row, Col, Spin
 } from 'antd';
-import axios from 'axios';
 import moment from 'moment';
+
 import Layout from '@/layouts/BasicLayout';
 import RacingBarChart from '@/components/RacingBarChart';
-import rawData from './data.json';
 
 const clientId = '6ab1aebe3d1999c206ae14ddbb366f6a65759bf2';
 const clientSecret = '190fe6a7296c449bf9af82e3d25132e765ad8f3e';
 const sleep = (msec) => new Promise((resolve) => setTimeout(resolve, msec));
 
-const token = '697c2ec6b9b7256e904120b7f59dba81d21bd507';
-
-async function getAllItems(id) {
+async function getAllItems(id, token) {
     const limit = 100;
     let page = 1;
 
@@ -25,7 +22,7 @@ async function getAllItems(id) {
 
     let current;
     do {
-        await sleep(100);
+        await sleep(10);
         const response = await fetch(`https://qiita.com/api/v2/users/${id}/items?page=${page}&per_page=${limit}`, {
             mode: 'cors',
             method: 'get',
@@ -44,7 +41,7 @@ async function getAllItems(id) {
     return items;
 }
 
-async function getAllLikes(itemId) {
+async function getAllLikes(itemId, token) {
     const limit = 100;
     let page = 1;
 
@@ -53,7 +50,7 @@ async function getAllLikes(itemId) {
 
     let current;
     do {
-        await sleep(100);
+        await sleep(10);
         const response = await fetch(`https://qiita.com/api/v2/items/${itemId}/likes?page=${page}&per_page=${limit}`, {
             mode: 'cors',
             method: 'get',
@@ -72,16 +69,16 @@ async function getAllLikes(itemId) {
     return items;
 }
 
-const fetchData = async (users) => {
+const fetchData = async (users, token) => {
     const data = {};
     for (let i = 0; i < users.length; i++) {
         const userId = users[i];
-        const items = await getAllItems(userId);
+        const items = await getAllItems(userId, token);
         let totalLikes = [];
 
         for (let j = 0; j < items.length; j++) {
             const item = items[j];
-            const likes = await getAllLikes(item.id);
+            const likes = await getAllLikes(item.id, token);
             totalLikes = totalLikes.concat(likes);
         }
 
@@ -148,7 +145,7 @@ export default () => {
         const url = new URL(location.href);
         const code = url.searchParams.get('code');
         if (!code) {
-            location.href = `https://qiita.com/api/v2/oauth/authorize?client_id=${clientId}&scope=read_qiita`
+            location.href = `https://qiita.com/api/v2/oauth/authorize?client_id=${clientId}&scope=read_qiita`;
         }
         setCode(code);
     }, [])
@@ -157,54 +154,58 @@ export default () => {
         if (!code) {
             return;
         }
+
         getAccessToken(code).then((token) => {
             setToken(token);
+        }).catch(() => {
+            location.href = `https://qiita.com/api/v2/oauth/authorize?client_id=${clientId}&scope=read_qiita`;
         });
     }, [code]);
 
     return (
         <Layout>
-            <Row gutter={8}>
-                {users.map((user, i) => {
-                    return (
-                        <Col key={i} span={6} style={{ marginBottom: 8 }}>
-                            <Input
-                                value={user}
-                                onChange={(e) => {
-                                    const updatedUsers = [...users];
-                                    updatedUsers[i] = e.target.value;
-                                    setUsers(updatedUsers);
-                                }}
-                            />
-                        </Col>
-                    );
-                })}
-            </Row>
-            <div style={{ textAlign: 'right' }}>
-                <Button
-                    onClick={async () => {
-                        const validUsers = users.filter((n) => n);
-                        const data = await fetchData(validUsers);
-                        console.log(data);
-                        setData(data);
-                        setValidUsers(validUsers);
-                    }}
-                    disabled={!token}
-                >
-                    取得
+            <Spin tip="Loading..." spinning={loading}>
+                <Row gutter={8}>
+                    {users.map((user, i) => {
+                        return (
+                            <Col key={i} span={6} style={{ marginBottom: 8 }}>
+                                <Input
+                                    value={user}
+                                    onChange={(e) => {
+                                        const updatedUsers = [...users];
+                                        updatedUsers[i] = e.target.value;
+                                        setUsers(updatedUsers);
+                                    }}
+                                />
+                            </Col>
+                        );
+                    })}
+                </Row>
+                <div style={{ textAlign: 'right' }}>
+                    <Button
+                        onClick={async () => {
+                            const validUsers = users.filter((n) => n);
+                            const data = await fetchData(validUsers, token);
+                            setData(data);
+                            setValidUsers(validUsers);
+                        }}
+                        disabled={!token}
+                    >
+                        取得
                 </Button>
-                <Button
-                    onClick={() => {
-                        ref.current.play();
-                    }}
-                    disabled={!data}
-                >
-                    実行
+                    <Button
+                        onClick={() => {
+                            ref.current.play();
+                        }}
+                        disabled={!data}
+                    >
+                        実行
                 </Button>
-            </div>
-            <div style={{ width: '100%', height: 500 }}>
-                <RacingBarChart ref={ref} data={data} users={validUsers} />
-            </div>
+                </div>
+                <div style={{ width: '100%', height: 500 }}>
+                    <RacingBarChart ref={ref} data={data} users={validUsers} />
+                </div>
+            </Spin>
         </Layout>
     );
 };
