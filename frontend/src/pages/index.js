@@ -3,9 +3,9 @@ import React, {
 } from 'react';
 import {
     Button, Input, Row, Col,
-    Divider,
     Alert
 } from 'antd';
+import axios from 'axios';
 import moment from 'moment';
 
 import ChartPlayer from '@/components/ChartPlayer';
@@ -19,26 +19,25 @@ async function getAllItems(id, token) {
     let page = 1;
     let items = [];
 
-    let current;
+    let totalCnt;
     do {
-        const response = await fetch(`https://qiita.com/api/v2/users/${id}/items?page=${page}&per_page=${limit}`, {
-            mode: 'cors',
-            method: 'get',
+        const response = await axios.get(`https://qiita.com/api/v2/users/${id}/items?page=${page}&per_page=${limit}`, {
             headers: {
-                Authorization: `Bearer ${token}`,
-                'Access-Control-Allow-Headers': 'total-count',
-                'Access-Control-Expose-Headers': 'total-count'
-            },
+                Authorization: `Bearer ${token}`
+            }
+        });
+        let totalLikesCount = 0;
+        response.data.forEach(({ likes_count: likesCount }) => {
+            totalLikesCount += likesCount;
         });
 
-        if (!response.ok) {
-            throw new Error();
+        if (totalLikesCount > 1000) {
+            throw new Error('Over1000LikesCount');
         }
 
-        current = await response.json();
-        items = items.concat(current);
-        page++;
-    } while (limit === current.length);
+        totalCnt = Number(response.headers['total-count']);
+        items = items.concat(response.data);
+    } while (page++ * limit < totalCnt);
 
     return items;
 }
@@ -46,30 +45,21 @@ async function getAllItems(id, token) {
 async function getAllLikes(itemId, token) {
     const limit = 100;
     let page = 1;
-    let items = [];
+    let likes = [];
 
-    let current;
+    let totalCnt;
     do {
-        const response = await fetch(`https://qiita.com/api/v2/items/${itemId}/likes?page=${page}&per_page=${limit}`, {
-            mode: 'cors',
-            method: 'get',
+        const response = await axios.get(`https://qiita.com/api/v2/items/${itemId}/likes?page=${page}&per_page=${limit}`, {
             headers: {
-                Authorization: `Bearer ${token}`,
-                'Access-Control-Allow-Headers': 'total-count',
-                'Access-Control-Expose-Headers': 'total-count'
+                Authorization: `Bearer ${token}`
             }
         });
 
-        if (!response.ok) {
-            throw new Error();
-        }
+        totalCnt = Number(response.headers['total-count']);
+        likes = likes.concat(response.data);
+    } while (page++ * limit < totalCnt);
 
-        current = await response.json();
-        items = items.concat(current);
-        page++;
-    } while (limit === current.length);
-
-    return items;
+    return likes;
 }
 
 const fetchData = async (users, token) => {
@@ -161,6 +151,7 @@ export default () => {
     const [validUsers, setValidUsers] = useState(null);
     const [token, setToken] = useState(null);
     const [error, setError] = useState(false);
+    const [likeExceedError, setLikeExceedError] = useState(false);
 
     useEffect(() => {
         const url = new URL(window.location.href);
@@ -173,7 +164,7 @@ export default () => {
 
         if (code) {
             getAccessToken(code).then((token) => {
-                window.location.href = `?token=${token}`;
+                setToken(token);
             }).catch(() => {
                 gotoOauth();
             });
@@ -195,6 +186,7 @@ export default () => {
         <Layout>
             <div style={{ background: '#fff', padding: 16 }}>
                 {error && <Alert type="error" message="エラーが発生しました。" style={{ marginBottom: 8 }} />}
+                {likeExceedError && <Alert type="error" message="LGMTが1000を超えるユーザーは取得できません。" style={{ marginBottom: 8 }} />}
                 <Row gutter={8}>
                     {users.map((user, i) => {
                         return (
@@ -223,6 +215,7 @@ export default () => {
                             }
                             setData(null);
                             setError(false);
+                            setLikeExceedError(false);
                             setValidUsers(null);
 
                             setLoading(true);
@@ -232,6 +225,9 @@ export default () => {
                                 setLoading(false);
                             }).catch((e) => {
                                 console.log(e);
+                                if (e.message === 'Over1000LikesCount') {
+                                    setLikeExceedError(true);
+                                }
                                 setLoading(false);
                                 setError(true);
                             });
