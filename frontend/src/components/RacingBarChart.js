@@ -14,7 +14,7 @@ export default class RacingBarChart extends React.Component {
 
     componentDidMount() {
         const margin = {
-            top: 0, right: 40, bottom: 30, left: 120
+            top: 0, right: 40, bottom: 30, left: 100
         };
 
         const width = this.chart.current.parentNode.clientWidth - margin.left - margin.right;

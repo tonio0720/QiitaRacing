@@ -209,7 +209,7 @@ export default () => {
                     {Array(userCount).fill(null).map((_, i) => {
                         const user = users[i];
                         return (
-                            <Col key={i} span={6} style={{ marginBottom: 8 }}>
+                            <Col key={i} md={6} sm={12} xs={24} style={{ marginBottom: 8 }}>
                                 <Input
                                     placeholder="ユーザーIDを入力してください。"
                                     value={user}
