@@ -126,8 +126,7 @@ const fetchData = async (users, token) => {
 };
 
 async function getAccessToken(code) {
-    const response = await axios('https://qiita.com/api/v2/access_tokens', {
-        method: 'post',
+    const response = await axios.post('https://qiita.com/api/v2/access_tokens', {
         headers: {
             'Content-Type': 'application/json'
         },
