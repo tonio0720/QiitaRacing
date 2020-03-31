@@ -74,13 +74,17 @@ async function getAllLikes(itemId) {
 
 const fetchData = async (users) => {
     const data = {};
-    await Promise.all(users.map(async (userId) => {
+    for (let i = 0; i < users.length; i++) {
+        const userId = users[i];
         const items = await getAllItems(userId);
         let totalLikes = [];
-        await Promise.all(items.map(async (item) => {
+
+        for (let j = 0; j < items.length; j++) {
+            const item = items[j];
             const likes = await getAllLikes(item.id);
             totalLikes = totalLikes.concat(likes);
-        }));
+        }
+
         totalLikes.forEach(({ created_at: createdAt }) => {
             const date = moment(createdAt).format('YYYY-MM-DD');
             if (!data[date]) {
@@ -91,7 +95,7 @@ const fetchData = async (users) => {
             }
             data[date][userId]++;
         });
-    }));
+    }
 
     const emptyData = {};
     users.forEach((user) => {
