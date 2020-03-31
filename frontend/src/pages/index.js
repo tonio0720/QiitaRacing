@@ -14,6 +14,16 @@ import Layout from '@/layouts/BasicLayout';
 const clientId = '6ab1aebe3d1999c206ae14ddbb366f6a65759bf2';
 const clientSecret = '190fe6a7296c449bf9af82e3d25132e765ad8f3e';
 
+async function checkToken(token) {
+    const response = await axios.get(`https://qiita.com/api/v2/items`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+    return response;
+}
+
+
 async function getAllItems(id, token) {
     const limit = 100;
     let page = 1;
@@ -116,18 +126,16 @@ const fetchData = async (users, token) => {
 };
 
 async function getAccessToken(code) {
-    const response = await fetch('https://qiita.com/api/v2/access_tokens', {
+    const response = await axios('https://qiita.com/api/v2/access_tokens', {
         method: 'post',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(
-            {
-                client_id: clientId,
-                client_secret: clientSecret,
-                code
-            }
-        )
+        data: {
+            client_id: clientId,
+            client_secret: clientSecret,
+            code
+        }
     });
 
     if (!response.ok) {
@@ -146,7 +154,7 @@ const userCount = 8;
 
 export default () => {
     const [loading, setLoading] = useState(false);
-    const [users, setUsers] = useState(Array(userCount).fill(null));
+    const [users, setUsers] = useState([]);
     const [data, setData] = useState(null);
     const [validUsers, setValidUsers] = useState(null);
     const [token, setToken] = useState(null);
@@ -154,16 +162,30 @@ export default () => {
     const [likeExceedError, setLikeExceedError] = useState(false);
 
     useEffect(() => {
+        try {
+            const users = JSON.parse(localStorage.getItem('users'));
+            setUsers(users || []);
+        } catch (e) {
+            // 
+        }
+    }, []);
+
+    useEffect(() => {
         const url = new URL(window.location.href);
-        const token = url.searchParams.get('token');
+        const token = url.searchParams.get('token') || localStorage.getItem('token');
         const code = url.searchParams.get('code');
         if (token) {
-            setToken(token);
+            checkToken(token).then(() => {
+                setToken(token);
+            }).catch(() => {
+                gotoOauth();
+            })
             return;
         }
 
         if (code) {
             getAccessToken(code).then((token) => {
+                localStorage.setItem('token', token);
                 setToken(token);
             }).catch(() => {
                 gotoOauth();
@@ -188,7 +210,8 @@ export default () => {
                 {error && <Alert type="error" message="エラーが発生しました。" style={{ marginBottom: 8 }} />}
                 {likeExceedError && <Alert type="error" message="LGMTが1000を超えるユーザーは取得できません。" style={{ marginBottom: 8 }} />}
                 <Row gutter={8}>
-                    {users.map((user, i) => {
+                    {Array(userCount).fill(null).map((_, i) => {
+                        const user = users[i];
                         return (
                             <Col key={i} span={6} style={{ marginBottom: 8 }}>
                                 <Input
