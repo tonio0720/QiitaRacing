@@ -2,6 +2,7 @@
     "name": "react-app",
     "version": "0.1.0",
     "private": true,
+    "homepage": "https://tonio0720.github.io/QiitaRacing/docs/",
     "dependencies": {
         "antd": "^3.26.9",
         "axios": "^0.19.2",
