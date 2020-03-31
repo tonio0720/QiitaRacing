@@ -127,21 +127,12 @@ const fetchData = async (users, token) => {
 
 async function getAccessToken(code) {
     const response = await axios.post('https://qiita.com/api/v2/access_tokens', {
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        data: {
-            client_id: clientId,
-            client_secret: clientSecret,
-            code
-        }
+        client_id: clientId,
+        client_secret: clientSecret,
+        code
     });
 
-    if (!response.ok) {
-        throw new Error();
-    }
-
-    const { token } = await response.json();
+    const { token } = response.data;
     return token;
 }
 
@@ -192,6 +183,7 @@ export default () => {
                 localStorage.setItem('token', token);
                 setToken(token);
             }).catch(() => {
+                localStorage.removeItem('token');
                 gotoOauth();
             });
             return;
