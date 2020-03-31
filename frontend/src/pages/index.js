@@ -162,6 +162,10 @@ export default () => {
     const [likeExceedError, setLikeExceedError] = useState(false);
 
     useEffect(() => {
+        document.title = 'Qiita Racer';
+    }, []);
+
+    useEffect(() => {
         try {
             const users = JSON.parse(localStorage.getItem('users'));
             setUsers(users || []);
