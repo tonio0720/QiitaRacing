@@ -134,6 +134,7 @@ async function getAccessToken(code) {
 const userCount = 8;
 
 export default () => {
+    const [loading, setLoading] = useState(false);
     const [users, setUsers] = useState(Array(userCount).fill(null));
     const [validUsers, setValidUsers] = useState(null);
     const [data, setData] = useState(null);
@@ -155,8 +156,10 @@ export default () => {
             return;
         }
 
+        setLoading(true);
         getAccessToken(code).then((token) => {
             setToken(token);
+            setLoading(false);
         }).catch(() => {
             location.href = `https://qiita.com/api/v2/oauth/authorize?client_id=${clientId}&scope=read_qiita`;
         });
@@ -184,10 +187,12 @@ export default () => {
                 <div style={{ textAlign: 'right' }}>
                     <Button
                         onClick={async () => {
+                            setLoading(true);
                             const validUsers = users.filter((n) => n);
                             const data = await fetchData(validUsers, token);
                             setData(data);
                             setValidUsers(validUsers);
+                            setLoading(false);
                         }}
                         disabled={!token}
                     >
