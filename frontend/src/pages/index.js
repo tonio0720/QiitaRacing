@@ -10,6 +10,8 @@ import Layout from '@/layouts/BasicLayout';
 import RacingBarChart from '@/components/RacingBarChart';
 import rawData from './data.json';
 
+const clientId = '6ab1aebe3d1999c206ae14ddbb366f6a65759bf2';
+const clientSecret = '190fe6a7296c449bf9af82e3d25132e765ad8f3e';
 const sleep = (msec) => new Promise((resolve) => setTimeout(resolve, msec));
 
 const token = '697c2ec6b9b7256e904120b7f59dba81d21bd507';
@@ -107,13 +109,52 @@ const fetchData = async (users) => {
     return datesData;
 };
 
+async function getAccessToken(code) {
+    const response = await fetch('https://qiita.com/api/v2/access_tokens', {
+        method: 'post',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(
+            {
+                client_id: clientId,
+                client_secret: clientSecret,
+                code
+            }
+        )
+    });
+
+    const { token } = await response.json();
+    return token;
+}
+
 const userCount = 8;
 
 export default () => {
     const [users, setUsers] = useState(Array(userCount).fill(null));
     const [validUsers, setValidUsers] = useState(null);
     const [data, setData] = useState(null);
+    const [code, setCode] = useState(null);
+    const [token, setToken] = useState(null);
     const ref = useRef(null);
+
+    useEffect(() => {
+        const url = new URL(location.href);
+        const code = url.searchParams.get('code');
+        if (!code) {
+            location.href = `https://qiita.com/api/v2/oauth/authorize?client_id=${clientId}&scope=read_qiita`
+        }
+        setCode(code);
+    }, [])
+
+    useEffect(() => {
+        if (!code) {
+            return;
+        }
+        getAccessToken(code).then((token) => {
+            setToken(token);
+        });
+    }, [code]);
 
     return (
         <Layout>
@@ -142,6 +183,7 @@ export default () => {
                         setData(data);
                         setValidUsers(validUsers);
                     }}
+                    disabled={!token}
                 >
                     取得
                 </Button>
