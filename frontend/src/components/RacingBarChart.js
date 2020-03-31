@@ -1,19 +1,15 @@
 import React from 'react';
-import axios from 'axios';
 import * as d3 from 'd3';
-import moment from 'moment';
+
+import styles from './index.module.less';
 
 const time = 100;
-let prevDateData = {};
-
-const sleep = (msec) => new Promise((resolve) => setTimeout(resolve, msec));
 
 export default class RacingBarChart extends React.Component {
     constructor(props) {
         super(props);
         this.chart = React.createRef();
-        this.prevDateData = {};
-        this.state = { currentDate: null };
+        this.user2Color = {};
     }
 
     componentDidMount() {
@@ -35,47 +31,35 @@ export default class RacingBarChart extends React.Component {
         this.yScale = d3.scaleBand()
             .rangeRound([height, 0], 0.1)
             .padding(0.4);
+        console.log(this);
     }
 
-    play = async () => {
-        const { data } = this.props;
-        this.prevDateData = {};
-        for (let i = 0; i < data.length; i++) {
-            const { date, likeCounts } = data[i];
-            await sleep();
-            this.setState({ currentDate: date });
-            await this.translateDate(likeCounts);
-        }
-    }
-
-    translateDate = (dateData) => {
-        const { users } = this.props;
+    moveToDate = (dateData) => {
         const {
             width,
             height,
             svg,
-            yScale
+            yScale,
+            user2Color
         } = this;
 
         return new Promise((resolve) => {
             const t = d3.transition().duration(time).on('end', resolve);
 
-            const totalDateData = {};
-            const data = users.map((user) => {
-                const value = (this.prevDateData[user] || 0) + (dateData[user] || 0);
-                totalDateData[user] = value;
+            const data = Object.keys(dateData).map((user) => {
+                const value = dateData[user] || 0;
                 return {
                     name: user,
                     value
                 };
             }).sort((a, b) => d3.ascending(a.value, b.value));
 
-            this.prevDateData = totalDateData;
-
             const max = d3.max(data, (d) => d.value);
             const xScale = d3.scaleLinear()
                 .range([0, width])
                 .domain([0, max < 10 ? 10 : max]);
+
+            yScale.domain(data.map((d) => d.name));
 
             let xAxis = svg.select('.x.axis');
             if (xAxis.empty()) {
@@ -88,17 +72,11 @@ export default class RacingBarChart extends React.Component {
                 .call(d3.axisBottom(xScale))
                 .selectAll('g');
 
-            yScale.domain(data.map((d) => d.name));
-
             let axis = svg.select('.y.axis');
             if (axis.empty()) {
                 axis = svg.append('g')
                     .attr('class', 'y axis');
             }
-
-            axis.transition(t)
-                .call(d3.axisLeft(yScale))
-                .selectAll('g');
 
             let barsG = svg.select('.bars-g');
             if (barsG.empty()) {
@@ -112,16 +90,18 @@ export default class RacingBarChart extends React.Component {
                     return d.name;
                 });
 
-            bars
-                .enter()
-                .append('g')
+            bars.exit().remove();
+
+            const enterBars = bars.enter();
+
+            enterBars
                 .append('rect')
                 .attr('class', 'bar')
                 .attr('x', 0)
-                .style('fill', function () {
-                    // return usercolor[d.name];
-                })
                 .merge(bars)
+                .style('fill', function (d) {
+                    return user2Color[d.name] || '#333';
+                })
                 .transition(t)
                 .attr('height', () => yScale.bandwidth())
                 .attr('y', function (d) {
@@ -139,8 +119,9 @@ export default class RacingBarChart extends React.Component {
 
             labels.exit().remove();
 
-            labels.enter()
-                .append('g')
+            const enterLabels = labels.enter();
+
+            enterLabels
                 .append('text')
                 .attr('class', 'label')
                 .attr('x', function (d) {
@@ -161,17 +142,17 @@ export default class RacingBarChart extends React.Component {
                     const interpolator = d3.interpolateNumber(start, end);
                     return function (t) { selection.text(Math.round(interpolator(t))); };
                 });
+
+            axis.transition(t)
+                .call(d3.axisLeft(yScale))
+                .selectAll('g');
         });
     }
 
     render() {
-        const { currentDate } = this.state;
         return (
-            <div>
-                <h2>{currentDate}</h2>
-                <div style={{ height: 400 }}>
-                    <svg ref={this.chart} />
-                </div>
+            <div style={{ height: 400 }} className={styles.racingBarChart}>
+                <svg ref={this.chart} />
             </div>
         );
     }

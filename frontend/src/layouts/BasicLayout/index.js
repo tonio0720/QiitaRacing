@@ -18,7 +18,8 @@ const BasicLayout = ({
     return (
         <Layout>
             <Header className={styles.header}>
-                <div className={styles.logo} />
+                {/* <div className={styles.logo} /> */}
+                <div className={styles.title}>Qiita Racing</div>
             </Header>
             <Content style={{ padding: '0 50px' }}>
                 <div style={{ padding: 24, minHeight: 'calc(100vh - 64px  - 69px)' }}>

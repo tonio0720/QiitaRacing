@@ -1,0 +1,40 @@
+.iconWrapper {
+    position: relative;
+    padding: 0px 30px;
+}
+
+.play,
+.stop {
+    color: #40a9ff;
+    left: 0;
+    position: absolute;
+    top: -2px;
+    width: 16px;
+    height: 16px;
+    line-height: 1;
+    font-size: 16px;
+}
+
+.racingBarChart {
+    :global {
+        svg {
+            .domain {
+                stroke: #d9d9d9;
+            }
+
+            .x.axis {
+                .tick {
+                    line {
+                        stroke: #d9d9d9;
+                    }
+                }
+            }
+
+            .y.axis {
+                text {
+                    font-size: 16px;
+                }
+            }
+        }
+    }
+}

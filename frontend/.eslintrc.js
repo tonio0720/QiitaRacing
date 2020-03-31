@@ -8,7 +8,9 @@ module.exports = {
     ],
     globals: {
         "window": true,
-        "document": true
+        "document": true,
+        "location": true,
+        "fetch": true
     },
     settings: {
         "import/resolver": {
