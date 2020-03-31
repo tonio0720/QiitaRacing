@@ -25,6 +25,7 @@ async function getAllItems(id) {
 
     let current;
     do {
+        await sleep(100);
         const response = await fetch(`https://qiita.com/api/v2/users/${id}/items?page=${page}&per_page=${limit}`, {
             mode: 'cors',
             method: 'get',
@@ -52,6 +53,7 @@ async function getAllLikes(itemId) {
 
     let current;
     do {
+        await sleep(100);
         const response = await fetch(`https://qiita.com/api/v2/items/${itemId}/likes?page=${page}&per_page=${limit}`, {
             mode: 'cors',
             method: 'get',
