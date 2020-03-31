@@ -182,6 +182,7 @@ export default () => {
             checkToken(token).then(() => {
                 setToken(token);
             }).catch(() => {
+                localStorage.removeItem('token');
                 gotoOauth();
             })
             return;
@@ -240,6 +241,9 @@ export default () => {
                             if (validUsers.length === 0) {
                                 return;
                             }
+
+                            localStorage.setItem('users', JSON.stringify(validUsers));
+
                             setData(null);
                             setError(false);
                             setLikeExceedError(false);

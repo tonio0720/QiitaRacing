@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/QiitaRacing/precache-manifest.010965defa2a83bf1452d48f9cc04ad3.js"
+  "/QiitaRacing/precache-manifest.f740b439fb253af5a0a26e135b52cf75.js"
 );
 
 self.addEventListener('message', (event) => {
