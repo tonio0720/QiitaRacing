@@ -1,0 +1,25 @@
+{
+  "files": {
+    "main.css": "/QiitaRacing/static/css/main.756f1b70.chunk.css",
+    "main.js": "/QiitaRacing/static/js/main.8604e6bc.chunk.js",
+    "main.js.map": "/QiitaRacing/static/js/main.8604e6bc.chunk.js.map",
+    "runtime-main.js": "/QiitaRacing/static/js/runtime-main.f26dcba2.js",
+    "runtime-main.js.map": "/QiitaRacing/static/js/runtime-main.f26dcba2.js.map",
+    "static/css/2.f7474f78.chunk.css": "/QiitaRacing/static/css/2.f7474f78.chunk.css",
+    "static/js/2.5003cd16.chunk.js": "/QiitaRacing/static/js/2.5003cd16.chunk.js",
+    "static/js/2.5003cd16.chunk.js.map": "/QiitaRacing/static/js/2.5003cd16.chunk.js.map",
+    "index.html": "/QiitaRacing/index.html",
+    "precache-manifest.9cd4e839d2fd1ea140b430e648325381.js": "/QiitaRacing/precache-manifest.9cd4e839d2fd1ea140b430e648325381.js",
+    "service-worker.js": "/QiitaRacing/service-worker.js",
+    "static/css/2.f7474f78.chunk.css.map": "/QiitaRacing/static/css/2.f7474f78.chunk.css.map",
+    "static/css/main.756f1b70.chunk.css.map": "/QiitaRacing/static/css/main.756f1b70.chunk.css.map",
+    "static/js/2.5003cd16.chunk.js.LICENSE.txt": "/QiitaRacing/static/js/2.5003cd16.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.f26dcba2.js",
+    "static/css/2.f7474f78.chunk.css",
+    "static/js/2.5003cd16.chunk.js",
+    "static/css/main.756f1b70.chunk.css",
+    "static/js/main.8604e6bc.chunk.js"
+  ]
+}
